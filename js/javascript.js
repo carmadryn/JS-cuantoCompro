@@ -7,7 +7,7 @@ function obtenerComida() {
     return prompt("¿Qué van a comer? Elige entre estas opciones: \n A | ASADO \n B | PIZZA").toUpperCase();
 }
 
-// Cosultar cantidad de invitados
+// Defino opciones
 const comida = obtenerComida();
 let comidaElegida;
 
