@@ -15,7 +15,7 @@ function calcularCantidades() {
         return;
     }
 
-    // Determinar cantidades basadas en el tipo de comida
+// Determinar cantidades basadas en el tipo de comida
     if (comida === "ASADO") {
         cantidades.totalCarne = invitados * asadoCarneXpersona;
         cantidades.totalPrepizzas = 0;
@@ -26,7 +26,7 @@ function calcularCantidades() {
         cantidades.totalQueso = invitados * pizzaQuesoXpersona;
     }
 
-    // Mostrar la lista de compras y la sección de ingredientes adicionales
+// Mostrar la lista de compras y la sección de ingredientes adicionales
     mostrarListaDeCompras();
     document.getElementById("ingredientesAdicionales").style.display = "block";
 }
@@ -50,7 +50,7 @@ function mostrarListaDeCompras() {
     const resultado = document.getElementById("resultado");
     resultado.innerHTML = ""; // Limpiar resultados anteriores
 
-    // Mostrar cantidades calculadas de carne, prepizzas, y queso
+// Mostrar cantidades calculadas de carne, prepizzas, y queso
     if (cantidades.totalCarne) {
         const liCarne = document.createElement("li");
         liCarne.textContent = `${cantidades.totalCarne} gramos de carne`;
@@ -67,11 +67,11 @@ function mostrarListaDeCompras() {
         resultado.appendChild(liQueso);
     }
 
-    // Mostrar ingredientes adicionales justo después del total de la comida
+// Mostrar ingredientes adicionales
     if (ingredientesExtra.length > 0) {
         ingredientesExtra.forEach((ingrediente) => {
             const liIngrediente = document.createElement("li");
-            liIngrediente.textContent = `Ingrediente adicional: ${ingrediente}`;
+            liIngrediente.textContent = `${ingrediente}`;
             resultado.appendChild(liIngrediente);
         });
     }
