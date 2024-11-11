@@ -3,16 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" href="./css/style.css">
-    <title>Cuánto comprar?</title>
+    <title>¿Cuánto Compro?</title>
     <link rel="icon" href="./img/bombilla.png" type="image">
+
 </head>
 <body>
-    <section>
-        <h1> Hola, bienvenidos a la calculadora de comida, tenes un evento? sabésCuanto comprar?</h1>
-        <h2>Te ayudo a calcular las cantidades de ingredientes para un asado o pizza, con amigos, cumpleaños o fiesta!</h2>
-    </section>
+    <h1>¿Cuánto Compro?</h1>
+    <form id="compraForm">
+        <label for="comida">¿Qué van a comer?</label>
+        <select id="comida" required>
+            <option value="">Selecciona una opción</option>
+            <option value="ASADO">Asado</option>
+            <option value="PIZZA">Pizza</option>
+        </select><br><br>
 
-    <script src="./js/javascript.js"></script>
+        <label for="invitados">¿Cuántos invitados van a asistir?</label>
+        <input type="number" id="invitados" min="1" required><br><br>
+
+        <button type="button" onclick="calcularCantidades()">Calcular Cantidades</button>
+    </form>
+
+    <h2>Lista de Compras</h2>
+    <ul id="resultado"></ul>
+
+    <div id="ingredientesAdicionales" style="display: none;">
+        <h3>Agregar Ingrediente Adicional</h3>
+        <label for="ingredienteInput">Ingrediente:</label>
+        <input type="text" id="ingredienteInput">
+        <button type="button" onclick="agregarIngrediente()">Agregar Ingrediente</button><br><br>
+    </div>
 </body>
+<script src="./js/javascript.js"></script>
 </html>

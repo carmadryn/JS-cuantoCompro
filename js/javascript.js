@@ -1,94 +1,88 @@
-//Cuánto Compro?
-//Objetivo: Dentro de las dos opciones de comidas (pizza o asado) calcular cantidad de gramos por persona y dar la posibilidad de sumar ingredientes para crear una lista de compras
-
-
-// Consultar que comida elige
-function obtenerComida() {
-    return prompt("¿Qué van a comer? Elige entre estas opciones: \n A | ASADO \n B | PIZZA").toUpperCase();
-}
-
-// Defino opciones
-const comida = obtenerComida();
-let comidaElegida;
-
-if (comida === "A") {
-    comidaElegida = "ASADO";
-} else if (comida === "B") {
-    comidaElegida = "PIZZA";
-} else {
-    alert("Opción no válida. Por favor, elige A o B.");
-}
-
-//Consultar cuantos invitados van asistir
-const cuantosInvitados = parseInt(prompt("¿Cuántos invitados van a asistir?"));
-
-// Defino la cantidad de gramos por persona para pizza o asado
+// Definir la cantidad de gramos por persona
 const asadoCarneXpersona = 500; // 500 gramos de carne por persona
 const pizzaPrepizzaXpersona = 0.5; // media prepizza por persona
 const pizzaQuesoXpersona = 100; // 100 gramos de queso por persona
+let ingredientesExtra = []; // Array para almacenar ingredientes adicionales
+let cantidades = {}; // Variable para almacenar las cantidades calculadas
 
 // Calcular las cantidades necesarias por persona
-function calcularCantidades(comida, invitados) {
-    let totalCarne = 0;
-    let totalPrepizzas = 0;
-    let totalQueso = 0;
-    
-    if (comida === "A") {
-        totalCarne = invitados * asadoCarneXpersona;
-    } else if (comida === "B") {
-        totalPrepizzas = invitados * pizzaPrepizzaXpersona;
-        totalQueso = invitados * pizzaQuesoXpersona;
-    }
-    
-    return { totalCarne, totalPrepizzas, totalQueso };
-}
+function calcularCantidades() {
+    const comida = document.getElementById("comida").value;
+    const invitados = parseInt(document.getElementById("invitados").value);
 
-// Solo continuamos si la opción es válida
-if (comidaElegida) {
-    const cantidades = calcularCantidades(comida, cuantosInvitados);
-
-
-// Preguntar si quiere agregar mas ingredientes
-const agregarIngredientesConfirmar = confirm("¿Deseas agregar ingredientes adicionales para crear una lista de compras?");
-let ingredientesExtra = [];
-if (agregarIngredientesConfirmar) {
-    ingredientesExtra = agregarIngredientes();
-}
-
-// Función para crear lista de ingredientes
-function agregarIngredientes() {
-let ingredientesExtra = [];
-let agregarMas = true;
-
-while (agregarMas) {
-    const nuevoIngrediente = prompt("Agrega un ingrediente adicional:");
-    if (nuevoIngrediente) {
-        ingredientesExtra.push(nuevoIngrediente);
-    }
-    agregarMas = confirm("¿Quieres agregar otro ingrediente?");
+    if (!comida || isNaN(invitados) || invitados <= 0) {
+        alert("Por favor, completa todos los campos correctamente.");
+        return;
     }
 
-    return ingredientesExtra;
+    // Determinar cantidades basadas en el tipo de comida
+    if (comida === "ASADO") {
+        cantidades.totalCarne = invitados * asadoCarneXpersona;
+        cantidades.totalPrepizzas = 0;
+        cantidades.totalQueso = 0;
+    } else if (comida === "PIZZA") {
+        cantidades.totalCarne = 0;
+        cantidades.totalPrepizzas = invitados * pizzaPrepizzaXpersona;
+        cantidades.totalQueso = invitados * pizzaQuesoXpersona;
+    }
+
+    // Mostrar la lista de compras y la sección de ingredientes adicionales
+    mostrarListaDeCompras();
+    document.getElementById("ingredientesAdicionales").style.display = "block";
 }
 
-// Función para mostrar la lista de compras
-function mostrarListaDeCompras(comidaElegida, cantidades, ingredientesExtra) {
-    let listaDeCompras = `Lista de compras para ${comidaElegida}:\n`;
+// Agregar ingrediente a la lista
+function agregarIngrediente() {
+    const ingredienteInput = document.getElementById("ingredienteInput");
+    const ingrediente = ingredienteInput.value.trim();
 
-    if (comidaElegida === "ASADO") {
-        listaDeCompras += `- ${cantidades.totalCarne} gramos de carne\n`;
-        } else if (comidaElegida === "PIZZA") {
-            listaDeCompras += `- ${cantidades.totalPrepizzas} prepizzas\n`;
-            listaDeCompras += `- ${cantidades.totalQueso} gramos de queso\n`;
-        }
-
-        if (ingredientesExtra.length > 0) {
-            listaDeCompras += `- Ingredientes adicionales: ${ingredientesExtra.join(", ")}\n`;
-        }
-
-        alert(listaDeCompras);
+    if (ingrediente) {
+        ingredientesExtra.push(ingrediente);
+        ingredienteInput.value = ""; // Limpiar el campo de entrada
+        mostrarListaDeCompras(); // Actualizar la lista de compras incluyendo los ingredientes adicionales
+    } else {
+        alert("Por favor, ingresa un ingrediente válido.");
+    }
 }
 
-// Mostrar la lista de compras final
-mostrarListaDeCompras(comidaElegida, cantidades, ingredientesExtra);
+// Mostrar la lista de compras completa (incluye ingredientes y cantidades)
+function mostrarListaDeCompras() {
+    const resultado = document.getElementById("resultado");
+    resultado.innerHTML = ""; // Limpiar resultados anteriores
+
+    // Mostrar cantidades calculadas de carne, prepizzas, y queso
+    if (cantidades.totalCarne) {
+        const liCarne = document.createElement("li");
+        liCarne.textContent = `${cantidades.totalCarne} gramos de carne`;
+        resultado.appendChild(liCarne);
+    }
+    if (cantidades.totalPrepizzas) {
+        const liPrepizzas = document.createElement("li");
+        liPrepizzas.textContent = `${cantidades.totalPrepizzas} prepizzas`;
+        resultado.appendChild(liPrepizzas);
+    }
+    if (cantidades.totalQueso) {
+        const liQueso = document.createElement("li");
+        liQueso.textContent = `${cantidades.totalQueso} gramos de queso`;
+        resultado.appendChild(liQueso);
+    }
+
+    // Mostrar ingredientes adicionales justo después del total de la comida
+    if (ingredientesExtra.length > 0) {
+        ingredientesExtra.forEach((ingrediente) => {
+            const liIngrediente = document.createElement("li");
+            liIngrediente.textContent = `Ingrediente adicional: ${ingrediente}`;
+            resultado.appendChild(liIngrediente);
+        });
+    }
 }
+
+// Al cargar la página, limpiar todos los datos previos
+document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById("comida").value = "";
+    document.getElementById("invitados").value = "";
+    document.getElementById("ingredienteInput").value = "";
+    ingredientesExtra = []; // Reiniciar ingredientes adicionales
+    cantidades = {}; // Reiniciar cantidades
+    mostrarListaDeCompras(); // Limpiar lista de compras al cargar
+});
