@@ -15,18 +15,26 @@ function calcularCantidades() {
         return;
     }
 
-// Determinar cantidades basadas en el tipo de comida
+    // Determinar cantidades basadas en el tipo de comida y almacenar en JSON
     if (comida === "ASADO") {
-        cantidades.totalCarne = invitados * asadoCarneXpersona;
-        cantidades.totalPrepizzas = 0;
-        cantidades.totalQueso = 0;
+        cantidades = {
+            totalCarne: invitados * asadoCarneXpersona,
+            totalPrepizzas: 0,
+            totalQueso: 0,
+        };
     } else if (comida === "PIZZA") {
-        cantidades.totalCarne = 0;
-        cantidades.totalPrepizzas = invitados * pizzaPrepizzaXpersona;
-        cantidades.totalQueso = invitados * pizzaQuesoXpersona;
+        cantidades = {
+            totalCarne: 0,
+            totalPrepizzas: invitados * pizzaPrepizzaXpersona,
+            totalQueso: invitados * pizzaQuesoXpersona,
+        };
     }
 
-// Mostrar la lista de compras y la sección de ingredientes adicionales
+    // Guardar en JSON
+    localStorage.setItem("cantidades", JSON.stringify(cantidades));
+    localStorage.setItem("ingredientesExtra", JSON.stringify(ingredientesExtra));
+
+    // Mostrar la lista de compras y la sección de ingredientes adicionales
     mostrarListaDeCompras();
     document.getElementById("ingredientesAdicionales").style.display = "block";
 }
@@ -39,6 +47,10 @@ function agregarIngrediente() {
     if (ingrediente) {
         ingredientesExtra.push(ingrediente);
         ingredienteInput.value = ""; // Limpiar el campo de entrada
+
+        // Guardar en JSON
+        localStorage.setItem("ingredientesExtra", JSON.stringify(ingredientesExtra));
+
         mostrarListaDeCompras(); // Actualizar la lista de compras incluyendo los ingredientes adicionales
     } else {
         alert("Por favor, ingresa un ingrediente válido.");
@@ -50,7 +62,11 @@ function mostrarListaDeCompras() {
     const resultado = document.getElementById("resultado");
     resultado.innerHTML = ""; // Limpiar resultados anteriores
 
-// Mostrar cantidades calculadas de carne, prepizzas, y queso
+    // Obtener datos de JSON y actualizar las cantidades e ingredientes
+    cantidades = JSON.parse(localStorage.getItem("cantidades")) || {};
+    ingredientesExtra = JSON.parse(localStorage.getItem("ingredientesExtra")) || [];
+
+    // Mostrar cantidades calculadas de carne, prepizzas, y queso
     if (cantidades.totalCarne) {
         const liCarne = document.createElement("li");
         liCarne.textContent = `${cantidades.totalCarne} gramos de carne`;
@@ -67,22 +83,26 @@ function mostrarListaDeCompras() {
         resultado.appendChild(liQueso);
     }
 
-// Mostrar ingredientes adicionales
-    if (ingredientesExtra.length > 0) {
-        ingredientesExtra.forEach((ingrediente) => {
-            const liIngrediente = document.createElement("li");
-            liIngrediente.textContent = `${ingrediente}`;
-            resultado.appendChild(liIngrediente);
-        });
-    }
+    // Mostrar ingredientes adicionales justo después del total de la comida
+    ingredientesExtra.forEach((ingrediente) => {
+        const liIngrediente = document.createElement("li");
+        liIngrediente.textContent = `${ingrediente}`;
+        resultado.appendChild(liIngrediente);
+    });
 }
 
 // Al cargar la página, limpiar todos los datos previos
 document.addEventListener("DOMContentLoaded", () => {
+    // Limpiar los datos en localStorage para que siempre esté vacío al cargar
+    localStorage.removeItem("cantidades");
+    localStorage.removeItem("ingredientesExtra");
+
+    // Limpiar los campos y variables locales
     document.getElementById("comida").value = "";
     document.getElementById("invitados").value = "";
     document.getElementById("ingredienteInput").value = "";
     ingredientesExtra = []; // Reiniciar ingredientes adicionales
     cantidades = {}; // Reiniciar cantidades
+
     mostrarListaDeCompras(); // Limpiar lista de compras al cargar
 });

@@ -7,10 +7,8 @@
     font-family: poppins;
     box-sizing: border-box;
     text-align: center;
-    
-    
-    
 }
+
 .formulario{
     border: 1px solid rgb(199, 197, 197);
     padding: 20px;
@@ -88,8 +86,6 @@
 }
 
 #resultado li{
-    /* background-color: coral; */
-    width: 50%;
     align-self: center;
     margin-bottom: 20px;
 }
