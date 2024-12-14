@@ -1,108 +1,140 @@
-// Definir la cantidad de gramos por persona
-const asadoCarneXpersona = 500; // 500 gramos de carne por persona
-const pizzaPrepizzaXpersona = 0.5; // media prepizza por persona
-const pizzaQuesoXpersona = 100; // 100 gramos de queso por persona
-let ingredientesExtra = []; // Array para almacenar ingredientes adicionales
-let cantidades = {}; // Variable para almacenar las cantidades calculadas
+// Selección de elementos del DOM
+const form = document.getElementById('compraForm');
+const resultContainer = document.getElementById('resultado');
+const extraIngredientInput = document.getElementById('ingredienteInput');
+const addIngredientButton = document.querySelector('.boton2');
+const extraIngredientsSection = document.getElementById('ingredientesAdicionales');
 
-// Calcular las cantidades necesarias por persona
+// Variables para almacenamiento
+let extraIngredients = [];
+let savedData = {};
+let prices = {}; // Aquí se almacenarán los precios cargados desde el JSON
+
+// Calcular las cantidades necesarias y costos
 function calcularCantidades() {
-    const comida = document.getElementById("comida").value;
-    const invitados = parseInt(document.getElementById("invitados").value);
+  const foodChoice = document.getElementById('comida').value;
+  const guests = parseInt(document.getElementById('invitados').value);
 
-    if (!comida || isNaN(invitados) || invitados <= 0) {
-        alert("Por favor, completa todos los campos correctamente.");
-        return;
-    }
-
-    // Determinar cantidades basadas en el tipo de comida y almacenar en JSON
-    if (comida === "ASADO") {
-        cantidades = {
-            totalCarne: invitados * asadoCarneXpersona,
-            totalPrepizzas: 0,
-            totalQueso: 0,
-        };
-    } else if (comida === "PIZZA") {
-        cantidades = {
-            totalCarne: 0,
-            totalPrepizzas: invitados * pizzaPrepizzaXpersona,
-            totalQueso: invitados * pizzaQuesoXpersona,
-        };
-    }
-
-    // Guardar en JSON
-    localStorage.setItem("cantidades", JSON.stringify(cantidades));
-    localStorage.setItem("ingredientesExtra", JSON.stringify(ingredientesExtra));
-
-    // Mostrar la lista de compras y la sección de ingredientes adicionales
-    mostrarListaDeCompras();
-    document.getElementById("ingredientesAdicionales").style.display = "block";
-}
-
-// Agregar ingrediente a la lista
-function agregarIngrediente() {
-    const ingredienteInput = document.getElementById("ingredienteInput");
-    const ingrediente = ingredienteInput.value.trim();
-
-    if (ingrediente) {
-        ingredientesExtra.push(ingrediente);
-        ingredienteInput.value = ""; // Limpiar el campo de entrada
-
-        // Guardar en JSON
-        localStorage.setItem("ingredientesExtra", JSON.stringify(ingredientesExtra));
-
-        mostrarListaDeCompras(); // Actualizar la lista de compras incluyendo los ingredientes adicionales
-    } else {
-        alert("Por favor, ingresa un ingrediente válido.");
-    }
-}
-
-// Mostrar la lista de compras completa (incluye ingredientes y cantidades)
-function mostrarListaDeCompras() {
-    const resultado = document.getElementById("resultado");
-    resultado.innerHTML = ""; // Limpiar resultados anteriores
-
-    // Obtener datos de JSON y actualizar las cantidades e ingredientes
-    cantidades = JSON.parse(localStorage.getItem("cantidades")) || {};
-    ingredientesExtra = JSON.parse(localStorage.getItem("ingredientesExtra")) || [];
-
-    // Mostrar cantidades calculadas de carne, prepizzas, y queso
-    if (cantidades.totalCarne) {
-        const liCarne = document.createElement("li");
-        liCarne.textContent = `${cantidades.totalCarne} gramos de carne`;
-        resultado.appendChild(liCarne);
-    }
-    if (cantidades.totalPrepizzas) {
-        const liPrepizzas = document.createElement("li");
-        liPrepizzas.textContent = `${cantidades.totalPrepizzas} prepizzas`;
-        resultado.appendChild(liPrepizzas);
-    }
-    if (cantidades.totalQueso) {
-        const liQueso = document.createElement("li");
-        liQueso.textContent = `${cantidades.totalQueso} gramos de queso`;
-        resultado.appendChild(liQueso);
-    }
-
-    // Mostrar ingredientes adicionales justo después del total de la comida
-    ingredientesExtra.forEach((ingrediente) => {
-        const liIngrediente = document.createElement("li");
-        liIngrediente.textContent = `${ingrediente}`;
-        resultado.appendChild(liIngrediente);
+  if (!foodChoice || isNaN(guests) || guests <= 0) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'Por favor, completa todos los campos correctamente.',
     });
+    return;
+  }
+
+  if (!prices[foodChoice.toLowerCase()]) {
+    Swal.fire({
+      icon: 'error',
+      title: 'Error',
+      text: 'No se pudieron cargar los precios correctamente.',
+    });
+    return;
+  }
+
+  let totalCost = 0;
+  let details = '';
+  let costPerGuest = 0;
+
+  if (foodChoice === 'ASADO') {
+    const carneCost = prices.asado.carne * guests;
+    totalCost = carneCost;
+    details = `${guests * 500} gramos de carne`;
+  } else if (foodChoice === 'PIZZA') {
+    const quesoCost = prices.pizza.queso * guests;
+    const prepizzaCost = prices.pizza.prepizza * guests;
+    totalCost = quesoCost + prepizzaCost;
+    details = `${guests * 0.5} prepizzas y ${guests * 100} gramos de queso`;
+  }
+
+  costPerGuest = totalCost / guests;
+
+  savedData = {
+    foodChoice,
+    guests,
+    totalCost,
+    costPerGuest,
+    details,
+    extraIngredients,
+  };
+
+  localStorage.setItem('purchaseData', JSON.stringify(savedData));
+
+  renderResults(details, totalCost, costPerGuest);
 }
 
-// Al cargar la página, limpiar todos los datos previos
-document.addEventListener("DOMContentLoaded", () => {
-    // Limpiar los datos en localStorage para que siempre esté vacío al cargar
-    localStorage.removeItem("cantidades");
-    localStorage.removeItem("ingredientesExtra");
+// Renderizar resultados en el DOM
+function renderResults(details, totalCost, costPerGuest) {
+  resultContainer.innerHTML = `
+    <li>${details}</li>
+    <li>Ingredientes adicionales: ${extraIngredients.join(', ') || 'Ninguno'}</li>
+    <li><strong>Total: $${totalCost}</strong></li>
+    <li>Costo por persona: <strong>$${costPerGuest.toFixed(2)}</strong></li>
+  `;
+  extraIngredientsSection.style.display = 'block';
+}
 
-    // Limpiar los campos y variables locales
-    document.getElementById("comida").value = "";
-    document.getElementById("invitados").value = "";
-    document.getElementById("ingredienteInput").value = "";
-    ingredientesExtra = []; // Reiniciar ingredientes adicionales
-    cantidades = {}; // Reiniciar cantidades
+// Agregar ingrediente adicional
+addIngredientButton.addEventListener('click', () => {
+  const ingredient = extraIngredientInput.value.trim();
+  if (ingredient) {
+    extraIngredients.push(ingredient);
+    extraIngredientInput.value = '';
+    updateExtraIngredientsList();
+    localStorage.setItem('extraIngredients', JSON.stringify(extraIngredients));
+    // Re-renderizar los resultados incluyendo los ingredientes adicionales
+    if (savedData.details && savedData.totalCost) {
+      renderResults(savedData.details, savedData.totalCost, savedData.costPerGuest);
+    }
+  } else {
+    Swal.fire({
+      icon: 'warning',
+      title: 'Advertencia',
+      text: 'Por favor, ingresa un ingrediente válido.',
+    });
+  }
+});
 
-    mostrarListaDeCompras(); // Limpiar lista de compras al cargar
+// Actualizar lista de ingredientes adicionales
+function updateExtraIngredientsList() {
+  const ingredientsList = document.createElement('ul');
+  extraIngredients.forEach((ingredient) => {
+    const li = document.createElement('li');
+    li.textContent = ingredient;
+    ingredientsList.appendChild(li);
+  });
+
+  const existingList = resultContainer.querySelector('ul');
+  if (existingList) {
+    existingList.remove();
+  }
+
+  resultContainer.appendChild(ingredientsList);
+}
+
+// Obtener precios simulados con fetch
+async function obtenerPrecios() {
+  try {
+    const response = await fetch('./js/prices.json'); // Ajusta la ruta según tu estructura de carpetas
+    prices = await response.json();
+    console.log('Precios obtenidos:', prices);
+  } catch (error) {
+    console.error('Error al obtener precios:', error);
+  }
+}
+
+// Al cargar la página
+document.addEventListener('DOMContentLoaded', async () => {
+  // Limpiar datos previos de localStorage
+  localStorage.removeItem('purchaseData');
+  localStorage.removeItem('extraIngredients');
+
+  // Reiniciar variables locales
+  savedData = {};
+  extraIngredients = [];
+  resultContainer.innerHTML = '';
+  extraIngredientsSection.style.display = 'none';
+
+  await obtenerPrecios(); // Asegúrate de cargar los precios antes de cualquier cálculo
 });

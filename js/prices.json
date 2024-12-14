@@ -1,0 +1,9 @@
+{
+  "pizza": {
+    "queso": 800,
+    "prepizza": 600
+  },
+  "asado": {
+    "carne": 3500
+  }
+}
